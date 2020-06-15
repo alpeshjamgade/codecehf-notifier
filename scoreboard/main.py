@@ -6,8 +6,9 @@ import pyttsx3
 import json
 
 urls = {"codecehf":"https://www.codechef.com/users/", "leetcode":"https://www.leetcode.com"}
-
 url = 'https://www.codechef.com/users/'
+
+
 def speakUp(message):
 	engine = pyttsx3.init()
 	voices = engine.getProperty('voices')
@@ -45,13 +46,37 @@ def check(res):
 	l = [Problem, Result, Lang]
 	return l
 
+
+def helper():
+	f = open("./data/user.json")
+	data = json.load(f)
+	for platforms in data:
+		url = platform["url"]
+		for user in platforms["users"]:
+			name = user["name"]
+			id = user["id"]
+			driver.get(url+id)
+			res = driver.execute_script("return document.documentElement.outerHTML")
+
+			l = check(res)
+			if(type[l[1]] == None):
+				l[1] = 0;
+			_msg = l[0]+l[1]+l[2]
+			if(_msg != user["ls"]):
+				notify(user['name'] + " | "+ l[0] + " | "+ l[1] + " | "+l[2])
+				user["ls"] = _msg
+				f2 = open("./data/user.json", "w+")
+				f2.write(json.dumps(data))
+				f2.close()
+	f.close()
+
 def main():
 	f = open('./data/user.json',)
 	data = json.load(f)
 	options = webdriver.ChromeOptions()
 	options.add_argument("headless")
 	driver = webdriver.Chrome('./data/chromedriver', options=options)
-	for user in data["users"]:
+	for user in data["codechef_users"]:
 		print(user['name'])
 		name = user["name"]
 		id = user["id"]
@@ -78,7 +103,11 @@ def main():
 
 
 if __name__ == '__main__':
+	options = webdriver.ChromeOptions()
+	options.add_argument("headless")
+	driver = webdriver.Chrome("./data/chrome/driver", options=options)
 	main()
+	driver.quit()
 # notify("Codecehf", "New Rating "+rating.string, "/home/alpeshjamgade/myworld/web-scrapping/chef-hat.png")
 
 # set webdriver and get page data;
